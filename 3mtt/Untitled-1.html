@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal — A Field Guide to AI Automation</title>
+<style>
+  :root{
+    --bg:#14151c;
+    --surface:#1c1e29;
+    --surface-2:#232533;
+    --text:#eae8e2;
+    --muted:#9698a8;
+    --amber:#f0a23a;
+    --teal:#5fc7bd;
+    --line:#2c2e3d;
+    --mono:'JetBrains Mono', 'Courier New', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  @font-face{ font-family:'Fraunces-fallback'; src:local('Georgia'); }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', Georgia, 'Times New Roman', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:#fff;
+  }
+  a{ color:inherit; text-decoration:none; }
+  img{max-width:100%; display:block;}
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(20,21,28,0.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav.wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:68px;
+  }
+  .logo{
+    font-family:'Fraunces', Georgia, serif;
+    font-size:22px; font-weight:600; color:#fff;
+    display:flex; align-items:center; gap:8px;
+  }
+  .logo .dot{ width:9px; height:9px; border-radius:50%; background:var(--amber); display:inline-block; }
+  .nav-links{ display:flex; gap:28px; font-size:14.5px; color:var(--muted); }
+  .nav-links a:hover{ color:var(--text); }
+  .nav-toggle{ display:none; background:none; border:none; color:var(--text); font-size:24px; cursor:pointer; }
+  @media (max-width:820px){
+    .nav-links{
+      position:absolute; top:68px; left:0; right:0;
+      background:var(--surface);
+      flex-direction:column; padding:18px 20px; gap:16px;
+      border-bottom:1px solid var(--line);
+      display:none;
+    }
+    .nav-links.open{ display:flex; }
+    .nav-toggle{ display:block; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:96px 0 72px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:56px;
+    align-items:end;
+  }
+  @media (max-width:900px){ .hero-grid{ grid-template-columns:1fr; } }
+  .hero h1{
+    font-size:clamp(38px, 5.4vw, 64px);
+    line-height:1.04;
+    max-width:14ch;
+  }
+  .hero p.lead{
+    margin-top:22px;
+    font-size:18px;
+    color:var(--muted);
+    max-width:46ch;
+  }
+  .hero-panel{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:22px;
+  }
+  .hero-panel .label{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--teal);
+    margin-bottom:12px;
+  }
+  .stat-row{ display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--line); }
+  .stat-row:first-of-type{ border-top:none; }
+  .stat-row .k{ color:var(--muted); font-size:13.5px; }
+  .stat-row .v{ font-family:var(--mono); font-size:13.5px; color:#fff; }
+
+  .search-bar{ margin-top:36px; max-width:520px; }
+  .search-bar input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:13px 16px;
+    font-size:15px;
+    border-radius:2px;
+    font-family:inherit;
+  }
+  .search-bar input:focus{ outline:2px solid var(--amber); outline-offset:-1px; border-color:var(--amber); }
+  .search-bar .hint{ font-size:12.5px; color:var(--muted); margin-top:8px; font-family:var(--mono); }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{ padding:76px 0; border-bottom:1px solid var(--line); }
+  .section-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px; gap:24px; flex-wrap:wrap; }
+  .section-head h2{ font-size:clamp(26px,3vw,36px); }
+  .section-head .count{ font-family:var(--mono); font-size:13px; color:var(--muted); }
+
+  /* ---------- CATEGORY GRID ---------- */
+  .cat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  @media (max-width:820px){ .cat-grid{ grid-template-columns:1fr; } }
+  .cat{ background:var(--bg); padding:30px 26px; }
+  .cat .idx{ font-family:var(--mono); font-size:12px; color:var(--amber); }
+  .cat h3{ font-size:20px; margin:10px 0 10px; }
+  .cat p{ color:var(--muted); font-size:14.5px; }
+  .cat ul{ margin-top:14px; padding-left:18px; font-size:13.5px; color:var(--muted); }
+  .cat ul li{ margin-bottom:5px; }
+
+  /* ---------- INDUSTRY TABLE ---------- */
+  .table-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:680px; }
+  th{ text-align:left; font-family:var(--mono); font-size:11.5px; color:var(--muted); font-weight:500; padding:10px 14px; border-bottom:1px solid var(--line); }
+  td{ padding:16px 14px; border-bottom:1px solid var(--line); font-size:14.5px; vertical-align:top; }
+  td.name{ color:#fff; font-weight:600; white-space:nowrap; }
+  tr:hover td{ background:var(--surface); }
+
+  /* ---------- TOOLS ---------- */
+  .tool-list{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  @media (max-width:700px){ .tool-list{ grid-template-columns:1fr; } }
+  .tool{ background:var(--surface); border:1px solid var(--line); padding:20px 22px; border-radius:2px; }
+  .tool .top{ display:flex; justify-content:space-between; align-items:baseline; }
+  .tool h4{ font-size:16px; color:#fff; font-family:'Fraunces', serif; font-weight:600; }
+  .tool .tag{ font-family:var(--mono); font-size:11px; color:var(--teal); border:1px solid var(--teal); padding:2px 7px; border-radius:20px; }
+  .tool p{ font-size:13.8px; color:var(--muted); margin-top:8px; }
+
+  /* ---------- PRO/CON ---------- */
+  .split{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  @media (max-width:780px){ .split{ grid-template-columns:1fr; } }
+  .split > div{ background:var(--bg); padding:32px; }
+  .split h3{ font-size:18px; margin-bottom:16px; }
+  .split.benefits h3{ color:var(--teal); }
+  .split.risks h3{ color:var(--amber); }
+  .split ol{ padding-left:20px; }
+  .split li{ font-size:14.5px; color:var(--muted); margin-bottom:12px; }
+  .split li strong{ color:var(--text); }
+
+  /* ---------- TIMELINE ---------- */
+  .timeline{ position:relative; padding-left:26px; border-left:1px solid var(--line); }
+  .t-item{ position:relative; padding-bottom:34px; }
+  .t-item:last-child{ padding-bottom:0; }
+  .t-item::before{ content:''; position:absolute; left:-31px; top:4px; width:9px; height:9px; border-radius:50%; background:var(--amber); }
+  .t-item .yr{ font-family:var(--mono); font-size:12.5px; color:var(--amber); }
+  .t-item h4{ font-size:17px; margin:4px 0 6px; color:#fff; font-family:'Fraunces',serif; }
+  .t-item p{ font-size:14.2px; color:var(--muted); max-width:60ch; }
+
+  /* ---------- FAQ ---------- */
+  .faq-item{ border-bottom:1px solid var(--line); }
+  .faq-item button{
+    width:100%; text-align:left; background:none; border:none; color:var(--text);
+    font-size:16.5px; padding:20px 0; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+    font-family:'Fraunces',serif; font-weight:600;
+  }
+  .faq-item .plus{ font-family:var(--mono); color:var(--amber); font-size:18px; transition:transform .2s; }
+  .faq-item.open .plus{ transform:rotate(45deg); }
+  .faq-a{ max-height:0; overflow:hidden; transition:max-height .25s ease; }
+  .faq-item.open .faq-a{ max-height:300px; }
+  .faq-a p{ padding-bottom:20px; color:var(--muted); font-size:14.5px; max-width:70ch; }
+
+  /* ---------- FOOTER ---------- */
+  footer{ padding:48px 0; }
+  .foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+  footer .small{ color:var(--muted); font-size:13px; font-family:var(--mono); }
+
+  .searchable.hide{ display:none; }
+  .no-results{ display:none; color:var(--muted); font-size:14.5px; padding:24px 0; font-family:var(--mono); }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <div class="logo"><span class="dot"></span>Signal</div>
+    <div class="nav-links" id="navLinks">
+      <a href="#categories">Categories</a>
+      <a href="#industries">Industries</a>
+      <a href="#tools">Tools</a>
+      <a href="#tradeoffs">Trade-offs</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>AI automation, mapped without the hype.</h1>
+      <p class="lead">A working reference on how software now does the tasks people used to do by hand — where it actually helps, where it doesn't, and what to watch before you plug it into something that matters.</p>
+      <div class="search-bar">
+        <input type="text" id="siteSearch" placeholder="Search this page — try 'agent', 'risk', 'manufacturing'…" autocomplete="off">
+        <div class="hint">Filters every section below in real time. No data leaves your browser.</div>
+      </div>
+    </div>
+    <div class="hero-panel">
+      <div class="label">ON THIS PAGE</div>
+      <div class="stat-row"><span class="k">Automation categories</span><span class="v">06</span></div>
+      <div class="stat-row"><span class="k">Industries covered</span><span class="v">08</span></div>
+      <div class="stat-row"><span class="k">Tool families</span><span class="v">10</span></div>
+      <div class="stat-row"><span class="k">Timeline entries</span><span class="v">07</span></div>
+      <div class="stat-row"><span class="k">Open questions</span><span class="v">08</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="categories">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Six kinds of "automation"</h2>
+      <span class="count">the word covers more than one thing</span>
+    </div>
+    <div class="cat-grid">
+
+      <div class="cat searchable">
+        <div class="idx">01</div>
+        <h3>Robotic process automation</h3>
+        <p>Software that clicks, copies, and types the way a person would across existing apps — no AI required, though modern RPA often adds it for judgment calls.</p>
+        <ul><li>Invoice data entry</li><li>Form-to-system transfers</li><li>Screen scraping legacy tools</li></ul>
+      </div>
+
+      <div class="cat searchable">
+        <div class="idx">02</div>
+        <h3>Workflow &amp; rules automation</h3>
+        <p>If-this-then-that logic that routes work between people and systems based on conditions, without needing to "understand" content.</p>
+        <ul><li>Approval chains</li><li>Ticket routing</li><li>Scheduled data syncs</li></ul>
+      </div>
+
+      <div class="cat searchable">
+        <div class="idx">03</div>
+        <h3>Machine learning pipelines</h3>
+        <p>Models trained on historical data to predict, classify, or score — the engine behind fraud flags, demand forecasts, and recommendations.</p>
+        <ul><li>Churn prediction</li><li>Demand forecasting</li><li>Anomaly detection</li></ul>
+      </div>
+
+      <div class="cat searchable">
+        <div class="idx">04</div>
+        <h3>Generative automation</h3>
+        <p>Large language and diffusion models producing text, code, or images on request, usually with a human reviewing the output before it ships.</p>
+        <ul><li>Drafting &amp; summarizing</li><li>Code generation</li><li>Image &amp; asset creation</li></ul>
+      </div>
+
+      <div class="cat searchable">
+        <div class="idx">05</div>
+        <h3>Agentic automation</h3>
+        <p>Systems that plan a sequence of steps, call tools, and adjust based on results — closer to delegating a task than issuing a command.</p>
+        <ul><li>Multi-step research</li><li>Autonomous coding tasks</li><li>Tool-calling assistants</li></ul>
+      </div>
+
+      <div class="cat searchable">
+        <div class="idx">06</div>
+        <h3>Physical &amp; industrial automation</h3>
+        <p>Robotics and control systems on factory floors and warehouses, increasingly paired with ML for vision and adaptive control.</p>
+        <ul><li>Robotic arms</li><li>Warehouse picking</li><li>Predictive maintenance</li></ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="industries">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Where it's actually being used</h2>
+      <span class="count">by sector</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Industry</th><th>Common use</th><th>Typical maturity</th></tr></thead>
+        <tbody>
+          <tr class="searchable"><td class="name">Customer support</td><td>Chat triage, ticket drafting, tier-1 resolution</td><td>Widely deployed</td></tr>
+          <tr class="searchable"><td class="name">Finance &amp; banking</td><td>Fraud detection, document review, reconciliation</td><td>Widely deployed</td></tr>
+          <tr class="searchable"><td class="name">Healthcare</td><td>Clinical note drafting, scheduling, imaging triage</td><td>Emerging, closely regulated</td></tr>
+          <tr class="searchable"><td class="name">Manufacturing</td><td>Predictive maintenance, quality inspection vision</td><td>Widely deployed</td></tr>
+          <tr class="searchable"><td class="name">Software engineering</td><td>Code generation, test writing, code review assist</td><td>Widely deployed</td></tr>
+          <tr class="searchable"><td class="name">Retail &amp; logistics</td><td>Demand forecasting, warehouse routing, pricing</td><td>Widely deployed</td></tr>
+          <tr class="searchable"><td class="name">Legal</td><td>Contract review, discovery, clause drafting</td><td>Emerging, human-checked</td></tr>
+          <tr class="searchable"><td class="name">Marketing</td><td>Copy drafting, campaign targeting, asset variants</td><td>Widely deployed</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Tool families worth knowing</h2>
+      <span class="count">categories, not endorsements</span>
+    </div>
+    <div class="tool-list">
+
+      <div class="tool searchable">
+        <div class="top"><h4>No-code workflow builders</h4><span class="tag">connect</span></div>
+        <p>Drag-and-drop platforms that trigger actions across apps when an event happens — the connective tissue for small teams automating busywork.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>RPA platforms</h4><span class="tag">enterprise</span></div>
+        <p>Bots that operate existing software the way a person would, useful when there's no API to integrate against directly.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>LLM APIs</h4><span class="tag">generate</span></div>
+        <p>Hosted language models accessed by developers to add drafting, summarizing, or reasoning into their own products.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>Agent frameworks</h4><span class="tag">orchestrate</span></div>
+        <p>Libraries for chaining model calls with tool use and memory, so a single request can become a multi-step task.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>Vector databases</h4><span class="tag">retrieve</span></div>
+        <p>Storage tuned for semantic search, letting a system find relevant context before generating a response.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>MLOps platforms</h4><span class="tag">operate</span></div>
+        <p>Infrastructure for training, versioning, deploying, and monitoring predictive models in production.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>Computer-use agents</h4><span class="tag">act</span></div>
+        <p>Models that can see a screen and control mouse and keyboard directly, aimed at tasks with no API at all.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>Document intelligence</h4><span class="tag">extract</span></div>
+        <p>Systems that pull structured data out of PDFs, forms, and scans for downstream processing.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>Conversational platforms</h4><span class="tag">interface</span></div>
+        <p>Chat and voice front-ends that route a request to the right backend system or model.</p>
+      </div>
+
+      <div class="tool searchable">
+        <div class="top"><h4>Robotic process controllers</h4><span class="tag">industrial</span></div>
+        <p>Software governing physical robotics — motion planning, safety interlocks, and coordination on a floor.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="tradeoffs">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>What you gain, what you're trusting</h2>
+      <span class="count">the honest version</span>
+    </div>
+    <div class="split">
+      <div class="benefits searchable">
+        <h3>Real benefits</h3>
+        <ol>
+          <li><strong>Speed on repetitive work.</strong> Tasks measured in hours can drop to minutes when the pattern is well-defined.</li>
+          <li><strong>Consistency.</strong> A rules-based or model-driven process doesn't get tired or skip steps under load.</li>
+          <li><strong>Coverage.</strong> Round-the-clock handling of a first pass, freeing people for judgment calls.</li>
+          <li><strong>Faster iteration.</strong> Drafts and prototypes that used to take days can take minutes to produce.</li>
+        </ol>
+      </div>
+      <div class="risks searchable">
+        <h3>Real risks</h3>
+        <ol>
+          <li><strong>Confident errors.</strong> Generative systems can produce wrong output that reads as fluent and sure of itself.</li>
+          <li><strong>Data exposure.</strong> Feeding sensitive information into third-party tools without checking retention policies.</li>
+          <li><strong>Automation of bias.</strong> A model trained on historical data can repeat historical unfairness at scale.</li>
+          <li><strong>Accountability gaps.</strong> When an autonomous step causes harm, who is responsible often isn't defined in advance.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="timeline">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>How we got here</h2>
+      <span class="count">selected milestones</span>
+    </div>
+    <div class="timeline">
+
+      <div class="t-item searchable">
+        <div class="yr">1990s</div>
+        <h4>Rules-based workflow tools</h4>
+        <p>Early business process automation software formalizes routing and approvals inside large organizations.</p>
+      </div>
+
+      <div class="t-item searchable">
+        <div class="yr">2000s</div>
+        <h4>RPA emerges</h4>
+        <p>Bots learn to operate existing desktop software directly, avoiding costly system integrations.</p>
+      </div>
+
+      <div class="t-item searchable">
+        <div class="yr">2010s</div>
+        <h4>ML goes into production</h4>
+        <p>Predictive models move from research into fraud detection, recommendations, and forecasting at scale.</p>
+      </div>
+
+      <div class="t-item searchable">
+        <div class="yr">2017</div>
+        <h4>The transformer architecture</h4>
+        <p>A new model design makes large-scale language understanding and generation dramatically more practical.</p>
+      </div>
+
+      <div class="t-item searchable">
+        <div class="yr">2020–2022</div>
+        <h4>Generative AI reaches the public</h4>
+        <p>Text and image generation move from labs to consumer products almost overnight.</p>
+      </div>
+
+      <div class="t-item searchable">
+        <div class="yr">2023–2024</div>
+        <h4>Tool-calling and retrieval mature</h4>
+        <p>Models gain the ability to search, query, and act on live data rather than only generate text.</p>
+      </div>
+
+      <div class="t-item searchable">
+        <div class="yr">2025–2026</div>
+        <h4>Agentic and computer-use systems</h4>
+        <p>Systems take on multi-step tasks with minimal supervision, including operating software directly.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Questions people actually ask</h2>
+    </div>
+    <div id="faqList">
+
+      <div class="faq-item searchable">
+        <button>Is AI automation the same as RPA? <span class="plus">+</span></button>
+        <div class="faq-a"><p>No. RPA operates existing software by mimicking clicks and keystrokes, with or without AI inside it. AI automation more broadly includes any system where a model makes a judgment call — classifying, predicting, or generating — as part of the process.</p></div>
+      </div>
+
+      <div class="faq-item searchable">
+        <button>Will it replace my job? <span class="plus">+</span></button>
+        <div class="faq-a"><p>It depends heavily on the role. Automation tends to take over specific tasks within a job before it takes over the whole job, which changes what the role looks like more often than it eliminates it outright — though that isn't true everywhere.</p></div>
+      </div>
+
+      <div class="faq-item searchable">
+        <button>What's an "agent" exactly? <span class="plus">+</span></button>
+        <div class="faq-a"><p>In this context, an agent is a system that can plan a sequence of steps, call tools or software to carry them out, and adjust based on what happens — rather than producing one response to one prompt.</p></div>
+      </div>
+
+      <div class="faq-item searchable">
+        <button>How do I start automating something safely? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Start with a narrow, well-defined task that has a clear right answer, keep a human reviewing output until you trust the failure rate, and know exactly what data the tool can see before you connect it to anything sensitive.</p></div>
+      </div>
+
+      <div class="faq-item searchable">
+        <button>What's the difference between automation and AI? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Automation is the broader idea of software doing a task without a person doing it manually. AI is one way to build that software — specifically the kind that can handle ambiguity or make judgment calls, rather than just follow fixed rules.</p></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <p class="no-results" id="noResults">No matches on this page for that search.</p>
+</div>
+
+<footer>
+  <div class="wrap foot-row">
+    <div class="small">SIGNAL — A FIELD GUIDE TO AI AUTOMATION</div>
+    <div class="small">BUILT WITH HTML / CSS / JS · NO BACKEND</div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.faq-item').classList.toggle('open');
+    });
+  });
+
+  // Client-side search/filter across all .searchable blocks
+  const searchInput = document.getElementById('siteSearch');
+  const searchables = Array.from(document.querySelectorAll('.searchable'));
+  const noResults = document.getElementById('noResults');
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+    searchables.forEach(el => {
+      const text = el.textContent.toLowerCase();
+      const match = q === '' || text.includes(q);
+      el.classList.toggle('hide', !match);
+      if (match) visibleCount++;
+    });
+    noResults.style.display = (q !== '' && visibleCount === 0) ? 'block' : 'none';
+  });
+</script>
+
+</body>
+</html>

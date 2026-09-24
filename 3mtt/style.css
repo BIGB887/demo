@@ -1,0 +1,13 @@
+*::before,*::after{margin: 0;padding: 0;
+                   box-sizing: border-box;}
+body{background: rgb(48, 45, 45)));color: aliceblue;
+      line-height:2; gap: 700px;}
+.login-page{display: flex; flex-direction: column; align-items: center; justify-content: center;}
+.login{padding: 15px; width: 95%; max-width: 350px;}
+.header{display: flex; flex-direction: row; justify-content: center;;}
+.first-letter{ font-family:Georgia, 'Times New Roman', Times, serif ; font-weight: 400; color: #3b82f6;}
+.image-sec{display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: inherit;}
+.image{border-radius: 50%; width: 100px; height: 100px; object-fit: cover;}
+.input-page{display: flex; flex-direction: column; justify-content: center; gap: 200px;}
+.log-page{display: flex; flex-direction: column;justify-content: center;align-items: center;}
+input{display: flex;flex-direction: column;justify-content: center; align-items: center;width: 100%;}
